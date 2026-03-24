@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "launches"
+version = "1.0.0"
+description = "Multi-agent launch script orchestrator"
+requires-python = ">=3.11"
+dependencies = [
+    "anthropic>=0.40.0",
+    "pydantic>=2.0",
+]
+
+[project.scripts]
+launches = "launches.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["launches*"]

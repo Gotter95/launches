@@ -1,0 +1,1 @@
+"""Weapons check phase."""
