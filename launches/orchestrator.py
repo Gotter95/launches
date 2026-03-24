@@ -4,137 +4,100 @@ from __future__ import annotations
 
 import asyncio
 
-from launches.config import DEFAULT_CHAR_BUDGET
 from launches.core.logger import PaperTrailLogger
 from launches.core.models import (
-    FinalScript,
+    ContentDraft,
+    FinalContent,
     PipelineResult,
-    ResearchBundle,
-    ScriptDraft,
 )
 from launches.output.renderer import render_output
-from launches.research.reddit import RedditResearchAgent
-from launches.research.twitter import TwitterResearchAgent
-from launches.research.youtube import YouTubeResearchAgent
-from launches.weapons.checker import WeaponsChecker
-from launches.writing.body import run_body_pipeline
-from launches.writing.cta import run_cta_pipeline
-from launches.writing.hook import run_hook_pipeline
+from launches.voice.analyzer import VoiceAnalyzer
+from launches.weapons.checker import VoiceChecker
+from launches.writing.email import run_email_pipeline
+from launches.writing.linkedin import run_linkedin_pipeline
+from launches.writing.twitter import run_twitter_pipeline
 
 
 async def run_pipeline(
-    brand: str,
-    brief: str,
-    char_budget: int = DEFAULT_CHAR_BUDGET,
+    topic: str,
+    samples: str,
     output_dir: str = "./output",
 ) -> PipelineResult:
-    """Run the full multi-agent launch script pipeline.
+    """Run the full multi-agent content generation pipeline.
 
-    Phase 1: Research (3 agents in parallel)
-    Phase 2: Writing (hooks parallel, body sequential, CTAs parallel)
-    Phase 3: Weapons check (line-by-line scoring)
+    Phase 1: Voice analysis (1 agent)
+    Phase 2: Content generation (3 agents in parallel, each with manager gating)
+    Phase 3: Voice consistency check (3 checks in parallel)
     Phase 4: Output rendering
     """
     logger = PaperTrailLogger()
 
     # ═══════════════════════════════════════════
-    # PHASE 1: RESEARCH (3 agents in parallel)
+    # PHASE 1: VOICE ANALYSIS
     # ═══════════════════════════════════════════
     print("\n" + "=" * 60)
-    print("PHASE 1: RESEARCH")
-    print("Running YouTube, Reddit, and Twitter agents in parallel...")
+    print("PHASE 1: VOICE ANALYSIS")
+    print("Analyzing writing samples to build voice fingerprint...")
     print("=" * 60)
 
-    yt_agent = YouTubeResearchAgent()
-    reddit_agent = RedditResearchAgent()
-    twitter_agent = TwitterResearchAgent()
+    analyzer = VoiceAnalyzer()
+    voice = await analyzer.run(samples)
 
-    yt_result, reddit_result, twitter_result = await asyncio.gather(
-        yt_agent.run(brand, brief),
-        reddit_agent.run(brand, brief),
-        twitter_agent.run(brand, brief),
-    )
+    logger.log("voice", "voice_analyzer", {"summary": voice.summary})
 
-    research = ResearchBundle(
-        youtube=yt_result,
-        reddit=reddit_result,
-        twitter=twitter_result,
-        brand=brand,
-        brief=brief,
-    )
-
-    logger.log("research", "youtube", {"summary": yt_result.summary})
-    logger.log("research", "reddit", {"summary": reddit_result.summary})
-    logger.log("research", "twitter", {"summary": twitter_result.summary})
-
-    print("  Research complete.")
-    print(f"  YouTube: {len(yt_result.keywords)} keyword results")
-    print(f"  Reddit: {len(reddit_result.pain_points)} pain points")
-    print(f"  Twitter: {len(twitter_result.top_posts)} posts analyzed")
+    print("  Voice analysis complete.")
+    print(f"  Tone: {voice.tone[:80]}{'...' if len(voice.tone) > 80 else ''}")
+    print(f"  Traits: {', '.join(voice.personality_traits[:5])}")
+    print(f"  Quirks: {', '.join(voice.stylistic_quirks[:3])}")
 
     # ═══════════════════════════════════════════
-    # PHASE 2: WRITING PIPELINE
+    # PHASE 2: CONTENT GENERATION (3 platforms in parallel)
     # ═══════════════════════════════════════════
     print("\n" + "=" * 60)
-    print("PHASE 2: WRITING PIPELINE")
+    print("PHASE 2: CONTENT GENERATION")
+    print("Writing LinkedIn, Twitter, and Email content in parallel...")
     print("=" * 60)
 
-    # Step 2a: 4 Hook Agents in parallel (each with manager gating)
-    print("\n--- Hooks (4 agents in parallel, each with manager loop) ---")
-    hooks = await run_hook_pipeline(brand, brief, research)
+    linkedin_piece, twitter_piece, email_piece = await asyncio.gather(
+        run_linkedin_pipeline(topic, voice),
+        run_twitter_pipeline(topic, voice),
+        run_email_pipeline(topic, voice),
+    )
 
-    for h in hooks:
-        status = "PASSED" if h.final_scores else "BEST EFFORT"
-        print(f"  [{h.style}] {status} after {len(h.iterations)} iterations")
+    print(f"\n  [linkedin] Complete after {len(linkedin_piece.iterations)} iterations")
+    print(f"  [twitter] Complete after {len(twitter_piece.iterations)} iterations")
+    print(f"  [email] Complete after {len(email_piece.iterations)} iterations")
 
-    # Step 2b: Body Agent (sequential — needs hooks for tone)
-    print("\n--- Body (1 agent with manager loop) ---")
-    body_result = await run_body_pipeline(brand, brief, research, hooks, char_budget)
-    print(f"  Body complete after {len(body_result.iterations)} iterations")
-
-    # Step 2c: 2 CTA Agents in parallel (need body for context)
-    print("\n--- CTAs (2 agents in parallel, each with manager loop) ---")
-    cta_results = await run_cta_pipeline(brand, brief, body_result.final_text)
-
-    for i, cta in enumerate(cta_results):
-        style = ["direct", "soft"][i]
-        print(f"  [{style}] Complete after {len(cta.iterations)} iterations")
-
-    # Build script draft
-    draft = ScriptDraft(
-        hooks=hooks,
-        body=body_result.final_text,
-        body_iterations=body_result.iterations,
-        ctas=[r.final_text for r in cta_results],
-        cta_iterations=[r.iterations for r in cta_results],
+    draft = ContentDraft(
+        linkedin=linkedin_piece,
+        twitter=twitter_piece,
+        email=email_piece,
     )
 
     # ═══════════════════════════════════════════
-    # PHASE 3: WEAPONS CHECK
+    # PHASE 3: VOICE CONSISTENCY CHECK
     # ═══════════════════════════════════════════
     print("\n" + "=" * 60)
-    print("PHASE 3: WEAPONS CHECK")
-    print("Scoring every line on Invention Novelty and Copy Intensity...")
+    print("PHASE 3: VOICE CHECK")
+    print("Scoring every piece on Voice Authenticity and Platform Fit...")
     print("=" * 60)
 
-    checker = WeaponsChecker()
-    scored_lines = await checker.run(body_result.final_text, char_budget)
+    checker = VoiceChecker()
 
-    passed = sum(1 for s in scored_lines if s.invention_novelty >= 10 and s.copy_intensity >= 10)
-    rewritten = sum(1 for s in scored_lines if s.rewritten)
-    total_chars = sum(len(s.text) for s in scored_lines)
+    linkedin_scored, twitter_scored, email_scored = await asyncio.gather(
+        checker.check("linkedin", linkedin_piece.text, voice),
+        checker.check("twitter", twitter_piece.text, voice),
+        checker.check("email", email_piece.text, voice),
+    )
 
-    print(f"  Lines passed: {passed}/{len(scored_lines)}")
-    print(f"  Lines rewritten: {rewritten}")
-    print(f"  Character count: {total_chars}/{char_budget}")
+    for scored in [linkedin_scored, twitter_scored, email_scored]:
+        status = "PASS" if (scored.voice_authenticity >= 10 and scored.platform_fit >= 10) else "REWRITTEN" if scored.rewritten else "KEPT"
+        print(f"  [{scored.platform}] {status} — voice: {scored.voice_authenticity}/10, fit: {scored.platform_fit}/10")
 
-    # Build final script
-    final = FinalScript(
-        hooks=hooks,
-        body_lines=scored_lines,
-        ctas=[r.final_text for r in cta_results],
-        char_count=total_chars,
-        char_budget=char_budget,
+    final = FinalContent(
+        linkedin=linkedin_scored,
+        twitter=twitter_scored,
+        email=email_scored,
     )
 
     # ═══════════════════════════════════════════
@@ -145,7 +108,7 @@ async def run_pipeline(
     print("=" * 60)
 
     result = PipelineResult(
-        research=research,
+        voice=voice,
         draft=draft,
         final=final,
         paper_trail={"entries": logger.get_trail()},
@@ -153,8 +116,8 @@ async def run_pipeline(
 
     output_path = render_output(result, output_dir)
     print(f"\n  Output written to: {output_path}/")
-    print(f"    01_research.md      — Full research data")
-    print(f"    02_working_script.md — All iterations & paper trail")
-    print(f"    03_final_script.md  — Clean, production-ready script")
+    print(f"    01_voice_profile.md  — Voice fingerprint analysis")
+    print(f"    02_working_drafts.md — All iterations & paper trail")
+    print(f"    03_final_content.md  — Production-ready content")
 
     return result

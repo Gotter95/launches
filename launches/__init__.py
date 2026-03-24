@@ -1,1 +1,1 @@
-"""Multi-agent launch script orchestrator."""
+"""Multi-agent content generator — LinkedIn, Twitter, and Email in your voice."""

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "launches"
 version = "1.0.0"
-description = "Multi-agent launch script orchestrator"
+description = "Multi-agent content generator — LinkedIn, Twitter, and Email in your voice"
 requires-python = ">=3.11"
 dependencies = [
     "anthropic>=0.40.0",

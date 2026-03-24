@@ -1,4 +1,4 @@
-"""Configuration constants for the orchestrator."""
+"""Configuration constants for the content generator."""
 
 # Model settings
 MODEL = "claude-sonnet-4-20250514"
@@ -13,48 +13,36 @@ MAX_CONCURRENT_AGENTS = 20
 REQUIRED_SCORE = 10
 MAX_MANAGER_ITERATIONS = 5
 
-# Hook settings
-HOOK_STYLES = ["contrarian", "story", "statistic", "question"]
-NUM_HOOKS = 4
+# Platform settings
+PLATFORMS = ["linkedin", "twitter", "email"]
 
-# CTA settings
-CTA_STYLES = ["direct", "soft"]
-NUM_CTAS = 2
-
-# Weapons check
-WEAPONS_BATCH_SIZE = 5
+# Voice check
+VOICE_CHECK_BATCH_SIZE = 5
 FILLER_THRESHOLD = 5  # Lines with both scores <= this get cut
 
-# Character budgets
-DEFAULT_CHAR_BUDGET = 3000
+# LinkedIn manager scoring dimensions
+LINKEDIN_DIMENSIONS = [
+    "voice_match",
+    "hook_power",
+    "value_density",
+    "engagement_potential",
+    "professional_tone",
+]
 
-# Research settings
-YOUTUBE_KEYWORDS_COUNT = 15
-YOUTUBE_TIME_FILTERS = ["all_time", "last_12_months", "last_30_days"]
-
-# Hook manager scoring dimensions
-HOOK_DIMENSIONS = [
+# Twitter manager scoring dimensions
+TWITTER_DIMENSIONS = [
+    "voice_match",
     "scroll_stop_power",
-    "specificity",
-    "emotional_voltage",
-    "curiosity_gap",
-    "brand_voice_match",
+    "conciseness",
+    "shareability",
+    "conversation_starter",
 ]
 
-# Body manager scoring dimensions
-BODY_DIMENSIONS = [
-    "narrative_flow",
-    "specificity",
-    "emotional_resonance",
-    "product_clarity",
-    "pacing",
-]
-
-# CTA manager scoring dimensions
-CTA_DIMENSIONS = [
-    "urgency",
-    "clarity",
-    "emotional_pull",
-    "specificity",
-    "action_friction",
+# Email manager scoring dimensions
+EMAIL_DIMENSIONS = [
+    "voice_match",
+    "subject_line_power",
+    "opening_hook",
+    "value_delivery",
+    "cta_clarity",
 ]

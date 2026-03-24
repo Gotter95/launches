@@ -1,1 +1,1 @@
-"""Writing phase agents."""
+"""Content writing agents for LinkedIn, Twitter, and Email."""

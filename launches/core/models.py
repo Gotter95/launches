@@ -1,85 +1,26 @@
-"""Data models for the orchestrator pipeline."""
+"""Data models for the content generator pipeline."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 
 
-@dataclass
-class VideoData:
-    title: str
-    views: str
-    channel: str
-    age: str
-    pattern_notes: str = ""
+# ── Voice Analysis ──────────────────────────────────────────
 
 
 @dataclass
-class KeywordResult:
-    keyword: str
-    time_filter: str
-    ceiling: list[VideoData] = field(default_factory=list)
-    floor_views: str = ""
-    title_patterns: list[str] = field(default_factory=list)
-
-
-@dataclass
-class YouTubeResearch:
-    keywords: list[KeywordResult] = field(default_factory=list)
-    top_title_patterns: list[str] = field(default_factory=list)
+class VoiceProfile:
+    tone: str = ""
+    vocabulary_patterns: list[str] = field(default_factory=list)
+    sentence_structure: str = ""
+    personality_traits: list[str] = field(default_factory=list)
+    recurring_themes: list[str] = field(default_factory=list)
+    stylistic_quirks: list[str] = field(default_factory=list)
+    emotional_range: str = ""
     summary: str = ""
 
 
-@dataclass
-class PainPoint:
-    quote: str
-    source: str
-    upvotes: int = 0
-    context: str = ""
-
-
-@dataclass
-class ThreadData:
-    title: str
-    subreddit: str
-    url: str = ""
-    engagement: str = ""
-    key_quotes: list[str] = field(default_factory=list)
-
-
-@dataclass
-class RedditResearch:
-    pain_points: list[PainPoint] = field(default_factory=list)
-    viral_threads: list[ThreadData] = field(default_factory=list)
-    controversial: list[ThreadData] = field(default_factory=list)
-    summary: str = ""
-
-
-@dataclass
-class PostData:
-    text: str
-    engagement: str
-    quote_tweet_ratio: str = ""
-    author: str = ""
-    notes: str = ""
-
-
-@dataclass
-class TwitterResearch:
-    top_posts: list[PostData] = field(default_factory=list)
-    ceiling: list[PostData] = field(default_factory=list)
-    floor: list[PostData] = field(default_factory=list)
-    high_qt_ratio: list[PostData] = field(default_factory=list)
-    summary: str = ""
-
-
-@dataclass
-class ResearchBundle:
-    youtube: YouTubeResearch
-    reddit: RedditResearch
-    twitter: TwitterResearch
-    brand: str
-    brief: str
+# ── Writing Pipeline ────────────────────────────────────────
 
 
 @dataclass
@@ -92,14 +33,6 @@ class Iteration:
 
 
 @dataclass
-class HookOption:
-    style: str
-    text: str
-    iterations: list[Iteration] = field(default_factory=list)
-    final_scores: dict[str, int] = field(default_factory=dict)
-
-
-@dataclass
 class ManagedResult:
     final_text: str
     iterations: list[Iteration] = field(default_factory=list)
@@ -108,36 +41,47 @@ class ManagedResult:
 
 
 @dataclass
-class ScriptDraft:
-    hooks: list[HookOption] = field(default_factory=list)
-    body: str = ""
-    body_iterations: list[Iteration] = field(default_factory=list)
-    ctas: list[str] = field(default_factory=list)
-    cta_iterations: list[list[Iteration]] = field(default_factory=list)
+class ContentPiece:
+    platform: str
+    text: str
+    iterations: list[Iteration] = field(default_factory=list)
+    final_scores: dict[str, int] = field(default_factory=dict)
 
 
 @dataclass
-class ScoredLine:
+class ContentDraft:
+    linkedin: ContentPiece | None = None
+    twitter: ContentPiece | None = None
+    email: ContentPiece | None = None
+
+
+# ── Voice Check ─────────────────────────────────────────────
+
+
+@dataclass
+class ScoredSection:
+    platform: str
     text: str
-    invention_novelty: int = 0
-    copy_intensity: int = 0
+    voice_authenticity: int = 0
+    platform_fit: int = 0
     rewritten: bool = False
     original: str | None = None
     cut: bool = False
 
 
+# ── Final Output ────────────────────────────────────────────
+
+
 @dataclass
-class FinalScript:
-    hooks: list[HookOption] = field(default_factory=list)
-    body_lines: list[ScoredLine] = field(default_factory=list)
-    ctas: list[str] = field(default_factory=list)
-    char_count: int = 0
-    char_budget: int = 0
+class FinalContent:
+    linkedin: ScoredSection | None = None
+    twitter: ScoredSection | None = None
+    email: ScoredSection | None = None
 
 
 @dataclass
 class PipelineResult:
-    research: ResearchBundle
-    draft: ScriptDraft
-    final: FinalScript
+    voice: VoiceProfile
+    draft: ContentDraft
+    final: FinalContent
     paper_trail: dict = field(default_factory=dict)

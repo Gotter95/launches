@@ -1,1 +1,1 @@
-"""Research phase agents."""
+"""Research phase agents (deprecated — see voice/)."""

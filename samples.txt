@@ -1,0 +1,51 @@
+Here are some writing samples:
+
+---
+
+Look — most people overthink AI. They read 47 blog posts about prompt engineering, watch every YouTube tutorial, and still can't get ChatGPT to write a decent email.
+
+The secret? Stop treating it like a search engine. Start treating it like a junior employee who's really eager but has no context.
+
+Give it context. Give it examples. Give it constraints. Then iterate.
+
+I've been building with AI for 2 years now and the biggest lesson is embarrassingly simple: the people who get the most out of AI are the ones who are clearest about what they actually want.
+
+That's it. That's the whole framework.
+
+---
+
+Thread on why most "AI strategies" are garbage:
+
+1/ Companies are spending millions on AI initiatives that amount to "let's add a chatbot." That's not strategy. That's a checkbox.
+
+2/ Real AI strategy starts with one question: what decision does this help us make better?
+
+Not faster. Not cheaper. BETTER.
+
+3/ If you can't answer that question in one sentence, you don't have a strategy. You have a PowerPoint deck.
+
+4/ The companies winning with AI right now aren't the ones with the biggest budgets. They're the ones who picked ONE painful process and rebuilt it from scratch.
+
+5/ Stop trying to "implement AI across the organization." Pick your ugliest workflow. Fix that. Then expand.
+
+---
+
+Subject: the one thing I'd change about how we talk about AI
+
+Hey —
+
+I've been thinking about this all week and I keep coming back to the same thing.
+
+We've made AI way too complicated.
+
+Not the technology — the conversation. Every conference, every LinkedIn post, every newsletter (including mine, probably) is drowning in jargon and frameworks and "paradigm shifts."
+
+Meanwhile, the people actually getting results? They're not reading any of that. They're just... building. Quietly. Without a 47-slide deck explaining their approach.
+
+I talked to a founder last week who automated 80% of their customer support with Claude. Took them 3 weeks. No consultants. No "AI transformation roadmap." Just a clear problem and a willingness to experiment.
+
+That's what I want more of in 2026. Less theory. More building.
+
+What's the one thing you've actually built with AI this year? Hit reply — I read every one.
+
+— G

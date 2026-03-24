@@ -1,1 +1,1 @@
-"""Weapons check phase."""
+"""Voice consistency check phase."""
