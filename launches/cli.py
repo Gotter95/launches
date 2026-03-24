@@ -8,11 +8,15 @@ import sys
 import time
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 from launches.config import DEFAULT_CHAR_BUDGET
 from launches.orchestrator import run_pipeline
 
 
 def main() -> None:
+    # Load .env file (ANTHROPIC_API_KEY, etc.)
+    load_dotenv()
     parser = argparse.ArgumentParser(
         prog="launches",
         description=(
